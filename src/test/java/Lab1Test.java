@@ -1,72 +1,42 @@
-
 import Util.ConnectionUtil;
+import Util.FileUtil;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+public class Lab1Test {
 
-public class AggregateFunctionsTest {
-    private final AggregateFunctionsActivity aggregateFunctionsActivity = new AggregateFunctionsActivity();
+    public double getResult(String file) {
+        String sql = FileUtil.parseSQLFile("src/main/"+file);
+        if(sql.length()<3){
+            Assert.fail("No SQL statement written in "+file);
+        }
+        double value = 0.0;
+        try {
+            Connection connection = ConnectionUtil.getConnection();
+            Statement s = connection.createStatement();
+            ResultSet rs =s.executeQuery(sql);
+
+            if(rs.next()) {
+                value = rs.getDouble(1);
+            }
+        } catch (SQLException e) {
+            Assert.fail("Issue with sql statement: "+e.getMessage());
+        }
+        return value;
+    }
 
     @Test
     public void testActivityCalculatePayroll() {
         Double expectedValue = 67400.00 + 42500.00 + 99890.99 + 120000 + 55050.50;
-        Double resultValue = aggregateFunctionsActivity.problem1();
+        Double resultValue = getResult("lab1.sql");
 
         Assert.assertEquals(expectedValue, resultValue);
 
     }
-
-    @Test
-    public void testActivityCountTheSmiths() {
-        int expectedValue = 2;
-        int resultValue = aggregateFunctionsActivity.problem2();
-
-        Assert.assertEquals(expectedValue, resultValue);
-
-    }
-
-    @Test
-    public void testActivityFindMinSalary() {
-        Double expected = 42500.00;
-        Double result = aggregateFunctionsActivity.problem3();
-
-        Assert.assertEquals(expected, result);
-    }
-
-    @Test
-    public void testActivityFindMaxSalary() {
-        Double expected = 120000.00;
-        Double result = aggregateFunctionsActivity.problem4();
-
-        Assert.assertEquals(expected, result);
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     @Before
     public void beforeEach() {
         try {
